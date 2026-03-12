@@ -1,6 +1,6 @@
 Esta automação foi desenvolvida para processar dados de inventário de carbono no solo, aplicando o método de Massa de Solo Equivalente. O script padroniza a leitura de dados brutos, realiza cálculos volumétricos e gera um relatório comparativo detalhado entre áreas de manejo (tratamentos) e áreas de referência (MATA).
 
-# Resumo da Metodologia
+## Resumo da Metodologia
 
 O cálculo central utiliza a correção de massa para comparar camadas de solo de densidades diferentes, garantindo que a comparação do estoque de carbono seja feita sobre a mesma massa de solo seco.A fórmula aplicada para o Estoque de Carbono Corrigido 
 
@@ -13,7 +13,7 @@ $mti$: Massa de solo acumulada total do ponto ($t/ha$).
 $msi$: Massa de solo acumulada da referência (MATA) ($t/ha$).
 $ctn$: Concentração de carbono na última camada ($t/t$).
 
-# Arquitetura da Automação
+## Arquitetura da Automação
 
 1. Ingestão e Tratamento (carregar_e_tratar)
 Varredura: Localiza todos os arquivos .xlsx no diretório configurado, ignorando arquivos temporários.
@@ -39,3 +39,7 @@ Por Ponto (Mata): Validação interna da variabilidade da área de referência.
 Por Talhão: Média consolidada de todas as amostras pertencentes a uma unidade de manejo.
 
 Resumo Geral: Comparativo simplificado entre a média total dos talhões e a média da mata.
+
+## Estrutura de saída
+
+O arquivo de saída é nomeado dinamicamente (ex: 2025200_Relatorio_Estoque_Carbono.xlsx) e contém as seguintes abas:
