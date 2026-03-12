@@ -57,7 +57,6 @@ def carregar_e_tratar(origem: Path):
                     .replace(',', '.', regex=True)
                     .apply(pd.to_numeric, errors='coerce')
                 )
-            
             else:
                 print(f"As colunas alvo não foram encontradas em '{arquivo.name}'.")
             
@@ -65,9 +64,11 @@ def carregar_e_tratar(origem: Path):
             print(f"{arquivo.name} processado com sucesso.")
         
         except Exception as e:
-            print(f"ERRO: O processamento de {arquivo.name} não foi executado.")
+            print(f"ERRO: O processamento de {arquivo.name} não foi executado: {e}")
     
     return df_tratados
+
+# %%
 
 # Extrair valores de espessura da camada de solo
 def extrair_espessura(df: pd.DataFrame):
@@ -83,12 +84,14 @@ def extrair_espessura(df: pd.DataFrame):
 
     limites = df['Profundidade'].str.extract(r'(\d+)\s*-\s*(\d+)')
 
-    lim_sup = pd.to_numeric(limites[0], errors='coerce')
-    lim_inf = pd.to_numeric(limites[1], errors='coerce')
+    lim_sup = pd.to_numeric(limites[1], errors='coerce')
+    lim_inf = pd.to_numeric(limites[0], errors='coerce')
 
     df['Espessura_(m)'] = ((lim_sup - lim_inf).abs())/100
 
     return df
+
+# %%
 
 # Associar dados de carbono orgânico com densidade do solo
 def associar_carbono_densidade(lista_dfs: list):
@@ -130,50 +133,65 @@ def associar_carbono_densidade(lista_dfs: list):
 
     return df_associado
 
+# %%
+
 # Calcular o estoque de carbono no solo
 def estoque_carbono(df: pd.DataFrame):
 
     df['Dry_Mass_(t/ha)'] = df['Espessura_(m)'] * df['Densidade_(g/cm3)'] * 10000
     df['C_Estoque_(t/ha)'] = df['Espessura_(m)'] * df['C_Quantitativo_(g/kg)'] * df['Densidade_(g/cm3)'] * 10
 
-    MATA = df[(df['Talhão'] == 'MATA')].reset_index(drop=True)
-    TRATAMENTOS = df[~(df['Talhão'] == 'MATA')].reset_index(drop=True)
+    def preparar_agregacao(df_subset: pd.DataFrame):
+        """
+        Função auxiliar para calcular cti, mti, mtn e ctn por ponto
+        """
+        grupo = ['Talhão', 'Ponto']
+        gp = df_subset.groupby(grupo)
+        last_row = gp.tail(1).set_index(grupo)
 
-    grupo = ['Talhão', 'Ponto']
-    gp_trat = TRATAMENTOS.groupby(grupo)
-    last_row = gp_trat.tail(1).set_index(grupo)
-    
-    df_res = gp_trat.agg({
-        'nome_arquivo': 'first',
-        'C_Estoque_(t/ha)': 'sum',
-        'Dry_Mass_(t/ha)': 'sum'
-    }).rename(columns={'C_Estoque_(t/ha)': 'total_C',
-                       'Dry_Mass_(t/ha)': 'mti'})
-    
-    df_res['cti'] = df_res['total_C'] - last_row['C_Estoque_(t/ha)']
-    df_res['mtn'] = last_row['Dry_Mass_(t/ha)']
-    df_res['ctn'] = last_row['C_Quantitativo_(g/kg)'] / 1000
-    df_res = df_res.reset_index()
+        res = gp.agg({
+            'nome_arquivo': 'first',
+            'C_Estoque_(t/ha)': 'sum',
+            'Dry_Mass_(t/ha)': 'sum'
+        }).rename(columns={'C_Estoque_(t/ha)': 'total_C', 'Dry_Mass_(t/ha)': 'mti'})
 
-    msi = (
-    MATA.groupby(grupo)['Dry_Mass_(t/ha)']
-    .sum()
-    .reset_index(name='msi')
+        res['cti'] = res['total_C'] - last_row['C_Estoque_(t/ha)']
+        res['mtn'] = last_row['Dry_Mass_(t/ha)']
+        res['ctn'] = last_row['C_Quantitativo_(g/kg)'] / 1000
+        return res.reset_index()
+
+    df_mata_base = df[df['Talhão'] == 'MATA'].copy()
+    df_trat_base = df[df['Talhão'] != 'MATA'].copy()
+
+    res_trat = preparar_agregacao(df_trat_base)
+    res_mata = preparar_agregacao(df_mata_base)
+
+    msi_ref = res_mata[['Ponto', 'mti']].rename(columns={
+        'Ponto': 'ponto_mata',
+        'mti': 'msi'
+    })
+
+    df_trat_cross = pd.merge(
+        res_trat.rename(columns={'Talhão': 'talhao_trat', 'Ponto': 'ponto_trat'}),
+        msi_ref, 
+        how='cross'
     )
 
-    df_res = df_res.rename(columns={
-    'Talhão': 'talhao_trat',
-    'Ponto': 'ponto_trat'
-    }).copy()
+    df_mata_cross = pd.merge(
+        res_mata.rename(columns={'Talhão': 'talhao_trat', 'Ponto': 'ponto_trat'}),
+        msi_ref,
+        how='cross'
+    )
 
-    msi = msi.rename(columns={
-        'Talhão': 'talhao_mata',
-        'Ponto': 'ponto_mata'
-    }).copy()
+    df_mata_cross = df_mata_cross[df_mata_cross['ponto_trat'] != df_mata_cross['ponto_mata']].copy()
 
-    df_cross = pd.merge(df_res, msi, how='cross')
-    df_cross['cs'] = df_cross['cti'] +(df_cross['mtn'] - (df_cross['mti'] - df_cross['msi'])) * df_cross['ctn']
-    return df_cross, MATA
+    df_final = pd.concat([df_trat_cross, df_mata_cross], ignore_index=True)
+
+    df_final['cs'] = df_final['cti'] + (df_final['mtn'] - (df_final['mti'] - df_final['msi'])) * df_final['ctn']
+
+    return df_final
+
+# %%
 
 def main(caminho_origem: Path):
     """
@@ -195,29 +213,26 @@ def main(caminho_origem: Path):
 
     df_associado = associar_carbono_densidade(lista_dfs)
     
-    df_final, df_mata = estoque_carbono(df_associado)
+    df_final = estoque_carbono(df_associado)
     
     print(f"--- Processamento Concluído ---")
     print(f"Total de arquivos .xlsx processados: {len(lista_dfs)}")
-    print(f"Total de pontos únicos processados: {np.max(df_final['ponto_trat'])}")
+    print(f"Total de pontos únicos processados de tratamentos: {df_final['ponto_trat'].nunique()}")
     
-    return df_final[['talhao_trat', 'ponto_trat', 'nome_arquivo', 'cs']], df_mata
+    return df_final[['talhao_trat', 'ponto_trat', 'nome_arquivo', 'cs']]
 
 # %%
 
 # ========== EXECUÇÃO ==========
-dados_finais, dados_mata = main(CAMINHO)
-
+dados_finais = main(CAMINHO)
 # %%
 
 estoque_C_ponto = (
 dados_finais.groupby(['talhao_trat', 'ponto_trat'])['cs'].agg(
-    media='mean',
-    desvio='std'
+    media='mean'
 ).round(0).reset_index())
 
-estoque_C_ponto.to_excel("estoque_C_ponto_teste.xlsx", index=False)
-
+estoque_C_ponto
 # %%
 
 display(
