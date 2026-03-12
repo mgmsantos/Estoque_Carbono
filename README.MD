@@ -1,0 +1,41 @@
+Esta automação foi desenvolvida para processar dados de inventário de carbono no solo, aplicando o método de Massa de Solo Equivalente. O script padroniza a leitura de dados brutos, realiza cálculos volumétricos e gera um relatório comparativo detalhado entre áreas de manejo (tratamentos) e áreas de referência (MATA).
+
+# Resumo da Metodologia
+
+O cálculo central utiliza a correção de massa para comparar camadas de solo de densidades diferentes, garantindo que a comparação do estoque de carbono seja feita sobre a mesma massa de solo seco.A fórmula aplicada para o Estoque de Carbono Corrigido 
+
+($cs$) é:$$cs = cti + (mtn - (mti - msi)) \times ctn$$
+
+Onde:
+$cti$: Carbono acumulado até a penúltima camada ($t/ha$).
+$mtn$: Massa de solo seco da última camada ($t/ha$).
+$mti$: Massa de solo acumulada total do ponto ($t/ha$).
+$msi$: Massa de solo acumulada da referência (MATA) ($t/ha$).
+$ctn$: Concentração de carbono na última camada ($t/t$).
+
+# Arquitetura da Automação
+
+1. Ingestão e Tratamento (carregar_e_tratar)
+Varredura: Localiza todos os arquivos .xlsx no diretório configurado, ignorando arquivos temporários.
+
+Limpeza: Remove colunas vazias e converte vírgulas em pontos para garantir que dados numéricos sejam lidos corretamente pelo Python.
+
+Extração de Espessura: A função extrair_espessura interpreta strings de profundidade (ex: "0-20") para calcular a espessura em metros.
+
+2. Processamento e Cálculo (estoque_carbono)
+Cálculos de Camada: Calcula a Massa Seca (Dry_Mass) e o Estoque de Carbono por camada individual.
+
+Agregação por Ponto: Consolida as camadas de cada ponto, identificando a última camada para fins de correção de massa.
+
+Análise Cruzada: Realiza um merge tipo cross entre cada ponto de tratamento e todos os pontos da MATA, permitindo calcular a média do estoque corrigido com base em múltiplas referências.
+
+3. Consolidação e Estatística
+O script gera quatro níveis de visualização:
+
+Por Ponto (Tratamentos): Média e desvio padrão de cada ponto de coleta.
+
+Por Ponto (Mata): Validação interna da variabilidade da área de referência.
+
+Por Talhão: Média consolidada de todas as amostras pertencentes a uma unidade de manejo.
+
+Resumo Geral: Comparativo simplificado entre a média total dos talhões e a média da mata.

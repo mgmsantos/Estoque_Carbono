@@ -1,7 +1,5 @@
-- exportar no excel
-- corrigir o estoque de carbono da mata
+- exportar no excel - ok
+- corrigir o estoque de carbono da mata - ok
 - 1 aba: estoque de carbono corrig. por ponto de coleta (media e desv)
 - 2 aba: estoque de carbono corrig. por talhao (media e desv)
 - 3 aba: estoque de carbono corrig. mata (media e desv)
-
-mandar email para o vinicius sobre o chat

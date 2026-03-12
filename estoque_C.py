@@ -5,11 +5,14 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from IPython.display import display
+import openpyxl
 
 # %%
 
 # ======== DEFINIÇÃO DO CAMINHO ==========
-CAMINHO = Path(r"\\Agroserver\libs_analise\Backup 2025\01_Comerciais\2025\19. OS_211\05_Densidade")
+CAMINHO = Path(r"\\Agroserver\libs_analise\Backup 2025\01_Comerciais\2025\21. OS_200\06_Estoque de Carbono\teste")
+ANO = 2025
+OS = 200
 
 # %%
 
@@ -214,29 +217,96 @@ def main(caminho_origem: Path):
     
     print(f"Pontos de Tratamento: {n_trat}")
     print(f"Pontos de Referência (MATA): {n_mata}")
-    
 
-    return df_calculado[['talhao_trat', 'ponto_trat', 'ponto_referencia', 'cs']]
+    df_calculado = df_calculado[['talhao_trat', 'ponto_trat', 'ponto_referencia', 'cs']].copy()
+
+    df_calculado = (
+        df_calculado.assign(
+            prioridade = np.where(df_calculado['talhao_trat'] == 'MATA', 0, 1)
+        )
+        .sort_values(by=['prioridade', 'ponto_trat'])
+        .drop(columns='prioridade')
+        .reset_index(drop=True)
+    )
+
+    return df_calculado
 
 # %%
 
 # ========== EXECUÇÃO ==========
 dados_finais = main(CAMINHO)
 dados_finais
+
 # %%
 
-estoque_C_ponto = (
+# ==== ESTOQUE DE CARBONO DOS TRATAMENTOS POR PONTO ====
+estoque_ponto = (
     dados_finais.groupby(['talhao_trat', 'ponto_trat'])['cs']
-    .agg(media='mean')
+    .agg(media = 'mean',desvio = 'std')
     .round(0)
+    .astype(int)
     .reset_index()
-)
-
-estoque_C_ponto = (
-    estoque_C_ponto.assign(
-        prioridade = np.where(estoque_C_ponto['talhao_trat'] == 'MATA', 0, 1)
-    )
-    .sort_values(by=['prioridade', 'ponto_trat'])
-    .drop(columns='prioridade')
+    .sort_values(by=['talhao_trat', 'ponto_trat'],
+                 key=lambda x: x != 'MATA' if x.name == 'talhao_trat' else x)
     .reset_index(drop=True)
 )
+
+estoque_ponto_trat = estoque_ponto[estoque_ponto['talhao_trat'] != 'MATA'].reset_index(drop=True)
+print(f"Estoque de carbono médio e desvio padrão por ponto em cada tratamento:")
+display(estoque_ponto_trat)
+
+# ==== ESTOQUE DE CARBONO DA MATA POR PONTO
+estoque_ponto_mata = estoque_ponto[estoque_ponto['talhao_trat'] == 'MATA'].reset_index(drop=True)
+print(f"Estoque de carbono médio de desvio padrão por ponto na MATA:")
+display(estoque_ponto_mata)
+
+# ==== ESTOQUE DE CARBONO POR TALHAO ====
+estoque_talhao = (
+    dados_finais.groupby(['talhao_trat'])['cs']
+    .agg(media = 'mean',
+         desvio = 'std')
+    .astype(int)
+    .reset_index()
+    .sort_values(by='talhao_trat')
+)
+
+estoque_talhao = estoque_talhao[estoque_talhao['talhao_trat'] != 'MATA'].copy()
+
+print(f"Estoque de carbono médio e desvio padrão por talhão e mata:")
+display(estoque_talhao)
+
+# ==== ESTOQUE DE CARBONO MÉDIO FAZENDA E MATA ====
+
+resumo = (
+    dados_finais.assign(condicao = np.where(dados_finais['talhao_trat'] == 'MATA', 'MATA', 'TALHOES'))
+    .groupby('condicao')['cs']
+    .agg(media='mean', desvio='std')
+    .round(0).astype(int)
+    .reindex(['TALHOES', 'MATA'])
+)
+
+print(f"Estoque de carbono médio e desvio padrão dos talhões e mata:")
+display(resumo)
+
+# %%
+
+# %%
+# ========== EXPORTAÇÃO PARA EXCEL EM MÚLTIPLAS ABAS ==========
+
+# Nome do arquivo de saída
+arquivo_saida = f"{ANO}{OS}_Relatorio_Estoque_Carbono.xlsx"
+
+with pd.ExcelWriter(arquivo_saida) as writer:
+    # 1ª Aba: Estoque por ponto de coleta (apenas tratamentos)
+    estoque_ponto_trat.to_excel(writer, sheet_name='Estoque_Ponto_Trat', index=False)
+
+    # 2ª Aba: Estoque da mata detalhado por ponto
+    estoque_ponto_mata.to_excel(writer, sheet_name='Estoque_Ponto_Mata', index=False)
+    
+    # 3ª Aba: Estoque por talhão (inclui o resumo por talhão e a média da mata)
+    estoque_talhao.to_excel(writer, sheet_name='Estoque_Por_Talhao', index=False)
+    
+    # 4ª Aba: Resumo geral
+    resumo.to_excel(writer, sheet_name='Estoque_Talhoes_Mata', index=True)
+
+print(f"Arquivo '{arquivo_saida}' gerado com sucesso!")
