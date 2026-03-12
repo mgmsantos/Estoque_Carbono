@@ -11,7 +11,7 @@ $$cs = cti + (mtn - (mti - msi)) \times ctn$$
 **Onde:**
 * **$cs$**: Estoque de Carbono Corrigido ($t/ha$).
 * **$cti$**: Carbono acumulado até a penúltima camada ($t/ha$).
-* **$mtn$**: Massa de solo seco da última camada ($t/ha$).
+* **$mtn$**: Massa de solo seco da última camada ($t/   ha$).
 * **$mti$**: Massa de solo acumulada total do ponto ($t/ha$).
 * **$msi$**: Massa de solo acumulada da referência (MATA) ($t/ha$).
 * **$ctn$**: Concentração de carbono na última camada ($t/t$).
@@ -53,3 +53,11 @@ O arquivo de saída é nomeado dinamicamente (ex: 2025200_Relatorio_Estoque_Carb
 | **Estoque_Ponto_Mata** | Média e Desvio da Referência |
 | **Estoque_Por_Talhao** | NResultados por Talhão |
 | **Estoque_Talhoes_Mata** | Médias Globais (Talhões vs Mata) |
+
+## Requesitos do sistema
+
+* Linguagem: Python 3.x
+
+* Bibliotecas: pandas, numpy, openpyxl, pathlib.
+
+* Input: Planilhas Excel com colunas padronizadas: Talhão, Ponto, Profundidade, Densidade_(g/cm3), C_Quantitativo_(g/kg).
