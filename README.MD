@@ -1,3 +1,5 @@
+## Visão Geral
+
 Esta automação foi desenvolvida para processar dados de inventário de carbono no solo, aplicando o método de Massa de Solo Equivalente. O script padroniza a leitura de dados brutos, realiza cálculos volumétricos e gera um relatório comparativo detalhado entre áreas de manejo (tratamentos) e áreas de referência (MATA).
 
 ## Resumo da Metodologia
@@ -43,3 +45,10 @@ Resumo Geral: Comparativo simplificado entre a média total dos talhões e a mé
 ## Estrutura de saída
 
 O arquivo de saída é nomeado dinamicamente (ex: 2025200_Relatorio_Estoque_Carbono.xlsx) e contém as seguintes abas:
+
+| Aba | Conteúdo |
+| :--- | :--- |
+| **Estoque_Ponto_Trat** | Média e Desvio por Ponto |
+| **Estoque_Ponto_Mata** | Média e Desvio da Referência |
+| **Estoque_Por_Talhao** | NResultados por Talhão |
+| **Estoque_Talhoes_Mata** | Médias Globais (Talhões vs Mata) |
