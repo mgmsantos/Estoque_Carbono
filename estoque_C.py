@@ -9,7 +9,7 @@ from IPython.display import display
 # %%
 
 # ======== DEFINIÇÃO DO CAMINHO ==========
-CAMINHO = Path(r"\\Agroserver\libs_analise\Backup 2025\01_Comerciais\2025\21. OS_200\06_Estoque de Carbono\teste")
+CAMINHO = Path(r"\\Agroserver\libs_analise\Backup 2025\01_Comerciais\2025\19. OS_211\05_Densidade")
 
 # %%
 
@@ -168,17 +168,15 @@ def estoque_carbono(df: pd.DataFrame):
 
     df_trat_cross = pd.merge(
         res_trat.rename(columns={'Talhão': 'talhao_trat', 'Ponto': 'ponto_trat'}),
-        msi_ref, 
+        msi_ref.rename(columns={'ponto_mata': 'ponto_referencia'}),
         how='cross'
     )
 
     df_mata_cross = pd.merge(
         res_mata.rename(columns={'Talhão': 'talhao_trat', 'Ponto': 'ponto_trat'}),
-        msi_ref,
+        msi_ref.rename(columns={'ponto_mata': 'ponto_referencia'}),
         how='cross'
     )
-
-    df_mata_cross = df_mata_cross[df_mata_cross['ponto_trat'] != df_mata_cross['ponto_mata']].copy()
 
     df_final = pd.concat([df_trat_cross, df_mata_cross], ignore_index=True)
 
@@ -207,14 +205,18 @@ def main(caminho_origem: Path):
 
     df_associado = associar_carbono_densidade(lista_dfs)
     
-    df_final = estoque_carbono(df_associado)
+    df_calculado = estoque_carbono(df_associado)
     
     print(f"--- Processamento Concluído ---")
-    print(f"Total de arquivos .xlsx processados: {len(lista_dfs)}")
-    print(f"Total de pontos de tratamentos processados: {df_final[df_final['talhao_trat'] != 'MATA']['ponto_trat'].nunique()}")
-    print(f"Total de pontos de tratamentos processados: {df_final[df_final['talhao_trat'] == 'MATA']['ponto_trat'].nunique()}")
+
+    n_trat = df_calculado.query("talhao_trat != 'MATA'")['ponto_trat'].nunique()
+    n_mata = df_calculado.query("talhao_trat == 'MATA'")['ponto_trat'].nunique()
     
-    return df_final[['talhao_trat', 'ponto_trat', 'nome_arquivo', 'cs']]
+    print(f"Pontos de Tratamento: {n_trat}")
+    print(f"Pontos de Referência (MATA): {n_mata}")
+    
+
+    return df_calculado[['talhao_trat', 'ponto_trat', 'ponto_referencia', 'cs']]
 
 # %%
 
@@ -222,7 +224,6 @@ def main(caminho_origem: Path):
 dados_finais = main(CAMINHO)
 dados_finais
 # %%
-
 
 estoque_C_ponto = (
     dados_finais.groupby(['talhao_trat', 'ponto_trat'])['cs']
@@ -239,5 +240,3 @@ estoque_C_ponto = (
     .drop(columns='prioridade')
     .reset_index(drop=True)
 )
-
-estoque_C_ponto.to_excel("teste.xlsx", index=False)
