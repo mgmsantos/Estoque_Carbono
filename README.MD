@@ -66,4 +66,4 @@ O arquivo de saída é nomeado dinamicamente (ex: 2025200_Relatorio_Estoque_Carb
 
 # Referências
 
-Fernandes, F. A.; Fernandes, A. H. B. M. Cálculo dos estoques de carbono do solo sob diferentes condições de manejo. Comunicado Técnico, Embrapa Pantanal, n. 69, 2008. [text](https://www.infoteca.cnptia.embrapa.br/bitstream/doc/792567/1/COT69.pdf)
+Fernandes, F. A.; Fernandes, A. H. B. M. Cálculo dos estoques de carbono do solo sob diferentes condições de manejo. Comunicado Técnico, Embrapa Pantanal, n. 69, 2008. [link_artigo](https://www.infoteca.cnptia.embrapa.br/bitstream/doc/792567/1/COT69.pdf)
