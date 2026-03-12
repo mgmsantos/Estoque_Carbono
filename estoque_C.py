@@ -14,8 +14,8 @@ CAMINHO = Path(r"\\Agroserver\libs_analise\Backup 2025\01_Comerciais\2025\21. OS
 # %%
 
 # ========== FUNÇÕES DE EXECUÇÃO ==========
-# Obter os arquivos específicos na pasta
 
+# Obter os arquivos específicos na pasta
 def carregar_e_tratar(origem: Path):
     """
     Localiza arquivos Excel no diretório, realiza a limpeza de colunas vazias
@@ -25,14 +25,14 @@ def carregar_e_tratar(origem: Path):
         origem (Path).
 
     Returns:
-        df.
+        lista[df]
     """
 
     if not origem.exists():
         print(f" ERRO: O caminho {origem} não existe.")
         return []
     
-    df_tratados = []
+    lista_df_tratados = []
     colunas_alvo = ['Massa_(g)', 'Volume_coletado_(cm3)',
                     'Densidade_(g/cm3)', 'C_Quantitativo_(g/kg)']
     
@@ -60,15 +60,13 @@ def carregar_e_tratar(origem: Path):
             else:
                 print(f"As colunas alvo não foram encontradas em '{arquivo.name}'.")
             
-            df_tratados.append(df_temp)
+            lista_df_tratados.append(df_temp)
             print(f"{arquivo.name} processado com sucesso.")
         
         except Exception as e:
             print(f"ERRO: O processamento de {arquivo.name} não foi executado: {e}")
     
-    return df_tratados
-
-# %%
+    return lista_df_tratados
 
 # Extrair valores de espessura da camada de solo
 def extrair_espessura(df: pd.DataFrame):
@@ -91,8 +89,6 @@ def extrair_espessura(df: pd.DataFrame):
 
     return df
 
-# %%
-
 # Associar dados de carbono orgânico com densidade do solo
 def associar_carbono_densidade(lista_dfs: list):
     """
@@ -111,7 +107,7 @@ def associar_carbono_densidade(lista_dfs: list):
     
     df_total = pd.concat(lista_dfs, ignore_index=True)
 
-    print(f"Arquivos detectados antes do agrupamento: {df_total['nome_arquivo'].unique()}")
+    print(f"Arquivos detectados antes do agrupamento: {df_total['nome_arquivo'].unique().tolist()}")
 
     df_total = extrair_espessura(df_total)
 
@@ -129,11 +125,9 @@ def associar_carbono_densidade(lista_dfs: list):
         'Volume_coletado_(cm3)': 'max'
     })
 
-    print(f"Arquivos que foram processados: {df_associado['nome_arquivo'].unique()}")
+    print(f"Arquivos que foram processados: {df_associado['nome_arquivo'].unique().tolist()}")
 
     return df_associado
-
-# %%
 
 # Calcular o estoque de carbono no solo
 def estoque_carbono(df: pd.DataFrame):
@@ -158,6 +152,7 @@ def estoque_carbono(df: pd.DataFrame):
         res['cti'] = res['total_C'] - last_row['C_Estoque_(t/ha)']
         res['mtn'] = last_row['Dry_Mass_(t/ha)']
         res['ctn'] = last_row['C_Quantitativo_(g/kg)'] / 1000
+
         return res.reset_index()
 
     df_mata_base = df[df['Talhão'] == 'MATA'].copy()
@@ -191,8 +186,7 @@ def estoque_carbono(df: pd.DataFrame):
 
     return df_final
 
-# %%
-
+# Função Mestre
 def main(caminho_origem: Path):
     """
     listagem, tratamento, associação e cálculo do estoque de C.
@@ -217,7 +211,8 @@ def main(caminho_origem: Path):
     
     print(f"--- Processamento Concluído ---")
     print(f"Total de arquivos .xlsx processados: {len(lista_dfs)}")
-    print(f"Total de pontos únicos processados de tratamentos: {df_final['ponto_trat'].nunique()}")
+    print(f"Total de pontos de tratamentos processados: {df_final[df_final['talhao_trat'] != 'MATA']['ponto_trat'].nunique()}")
+    print(f"Total de pontos de tratamentos processados: {df_final[df_final['talhao_trat'] == 'MATA']['ponto_trat'].nunique()}")
     
     return df_final[['talhao_trat', 'ponto_trat', 'nome_arquivo', 'cs']]
 
@@ -225,25 +220,24 @@ def main(caminho_origem: Path):
 
 # ========== EXECUÇÃO ==========
 dados_finais = main(CAMINHO)
+dados_finais
 # %%
+
 
 estoque_C_ponto = (
-dados_finais.groupby(['talhao_trat', 'ponto_trat'])['cs'].agg(
-    media='mean'
-).round(0).reset_index())
-
-estoque_C_ponto
-# %%
-
-display(
-dados_finais.groupby(['talhao_trat'])['cs'].agg(
-    media='mean',
-    desvio='std'
-).round(0).reset_index()
+    dados_finais.groupby(['talhao_trat', 'ponto_trat'])['cs']
+    .agg(media='mean')
+    .round(0)
+    .reset_index()
 )
 
+estoque_C_ponto = (
+    estoque_C_ponto.assign(
+        prioridade = np.where(estoque_C_ponto['talhao_trat'] == 'MATA', 0, 1)
+    )
+    .sort_values(by=['prioridade', 'ponto_trat'])
+    .drop(columns='prioridade')
+    .reset_index(drop=True)
+)
 
-# %%
-
-print(f"média: {np.mean(dados_finais['cs']).round(0)}")
-print(f"dv: {np.std(dados_finais['cs'])}")
+estoque_C_ponto.to_excel("teste.xlsx", index=False)
