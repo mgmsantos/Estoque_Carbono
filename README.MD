@@ -6,14 +6,15 @@ Esta automação foi desenvolvida para processar dados de inventário de carbono
 
 O cálculo central utiliza a correção de massa para comparar camadas de solo de densidades diferentes, garantindo que a comparação do estoque de carbono seja feita sobre a mesma massa de solo seco.A fórmula aplicada para o Estoque de Carbono Corrigido 
 
-($cs$) é:$$cs = cti + (mtn - (mti - msi)) \times ctn$$
+$$cs = cti + (mtn - (mti - msi)) \times ctn$$
 
-Onde:
-$cti$: Carbono acumulado até a penúltima camada ($t/ha$).
-$mtn$: Massa de solo seco da última camada ($t/ha$).
-$mti$: Massa de solo acumulada total do ponto ($t/ha$).
-$msi$: Massa de solo acumulada da referência (MATA) ($t/ha$).
-$ctn$: Concentração de carbono na última camada ($t/t$).
+**Onde:**
+* **$cs$**: Estoque de Carbono Corrigido ($t/ha$).
+* **$cti$**: Carbono acumulado até a penúltima camada ($t/ha$).
+* **$mtn$**: Massa de solo seco da última camada ($t/ha$).
+* **$mti$**: Massa de solo acumulada total do ponto ($t/ha$).
+* **$msi$**: Massa de solo acumulada da referência (MATA) ($t/ha$).
+* **$ctn$**: Concentração de carbono na última camada ($t/t$).
 
 ## Arquitetura da Automação
 
