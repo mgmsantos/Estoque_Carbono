@@ -4,7 +4,9 @@ Esta automação foi desenvolvida para processar dados de inventário de carbono
 
 ## Resumo da Metodologia
 
-O cálculo central utiliza a correção de massa para comparar camadas de solo de densidades diferentes, garantindo que a comparação do estoque de carbono seja feita sobre a mesma massa de solo seco.A fórmula aplicada para o Estoque de Carbono Corrigido 
+O cálculo central utiliza a correção de massa para comparar camadas de solo de densidades diferentes, garantindo que a comparação do estoque de carbono seja feita sobre a mesma massa de solo seco.
+
+A fórmula aplicada para o Estoque de Carbono Corrigido (Fernandes; Fernandes, 2008) corresponde a:
 
 $$cs = cti + (mtn - (mti - msi)) \times ctn$$
 
@@ -61,3 +63,7 @@ O arquivo de saída é nomeado dinamicamente (ex: 2025200_Relatorio_Estoque_Carb
 * Bibliotecas: pandas, numpy, openpyxl, pathlib.
 
 * Input: Planilhas Excel com colunas padronizadas: Talhão, Ponto, Profundidade, Densidade_(g/cm3), C_Quantitativo_(g/kg).
+
+# Referências
+
+Fernandes, F. A.; Fernandes, A. H. B. M. Cálculo dos estoques de carbono do solo sob diferentes condições de manejo. Comunicado Técnico, Embrapa Pantanal, n. 69, 2008. [text](https://www.infoteca.cnptia.embrapa.br/bitstream/doc/792567/1/COT69.pdf)
