@@ -49,7 +49,7 @@ Resumo Geral: Comparativo simplificado entre a média total dos talhões e a mé
 
 O arquivo de saída é nomeado dinamicamente (ex: 2025200_Relatorio_Estoque_Carbono.xlsx) e contém as seguintes abas:
 
-| Aba | | Nome| Conteúdo |
+| Aba | | Nome | Conteúdo |
 | :--- | :--- | :--- |
 | 1 | **Estoque_Ponto_Trat** | Média e Desvio Padrão por Ponto |
 | 2 | **Estoque_Ponto_Mata** | Média e Desvio Padrão da Referência (Mata) |
