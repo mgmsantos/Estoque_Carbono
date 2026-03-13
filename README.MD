@@ -13,7 +13,7 @@ $$cs = cti + (mtn - (mti - msi)) \times ctn$$
 **Onde:**
 * **$cs$**: Estoque de Carbono Corrigido ($t/ha$).
 * **$cti$**: Carbono acumulado até a penúltima camada ($t/ha$).
-* **$mtn$**: Massa de solo seco da última camada ($t/   ha$).
+* **$mtn$**: Massa de solo seco da última camada ($t/ha$).
 * **$mti$**: Massa de solo acumulada total do ponto ($t/ha$).
 * **$msi$**: Massa de solo acumulada da referência (MATA) ($t/ha$).
 * **$ctn$**: Concentração de carbono na última camada ($t/t$).
@@ -49,12 +49,12 @@ Resumo Geral: Comparativo simplificado entre a média total dos talhões e a mé
 
 O arquivo de saída é nomeado dinamicamente (ex: 2025200_Relatorio_Estoque_Carbono.xlsx) e contém as seguintes abas:
 
-| Aba | Conteúdo |
-| :--- | :--- |
-| **Estoque_Ponto_Trat** | Média e Desvio Padrão por Ponto |
-| **Estoque_Ponto_Mata** | Média e Desvio Padrão da Referência (Mata) |
-| **Estoque_Por_Talhao** | Média e Desvio Padrão por Talhão |
-| **Estoque_Talhoes_Mata** | Médias Globais (Talhões vs Mata) |
+| Aba | | Nome| Conteúdo |
+| :--- | :--- | :--- |
+| 1 | **Estoque_Ponto_Trat** | Média e Desvio Padrão por Ponto |
+| 2 | **Estoque_Ponto_Mata** | Média e Desvio Padrão da Referência (Mata) |
+| 3 | **Estoque_Por_Talhao** | Média e Desvio Padrão por Talhão |
+| 4 | **Estoque_Talhoes_Mata** | Médias Globais (Talhões vs Mata) |
 
 ## Requesitos do sistema
 
