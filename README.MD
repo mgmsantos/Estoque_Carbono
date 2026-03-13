@@ -11,11 +11,11 @@ A fórmula aplicada para o Estoque de Carbono Corrigido (Fernandes; Fernandes, 2
 $$cs = cti + (mtn - (mti - msi)) \times ctn$$
 
 **Onde:**
-* **$cs$**: Estoque de Carbono Corrigido ($t/ha$).
-* **$cti$**: Carbono acumulado até a penúltima camada ($t/ha$).
-* **$mtn$**: Massa de solo seco da última camada ($t/ha$).
-* **$mti$**: Massa de solo acumulada total do ponto ($t/ha$).
-* **$msi$**: Massa de solo acumulada da referência (MATA) ($t/ha$).
+* **$cs$**: Estoque de Carbono Corrigido ($t/ha$);
+* **$cti$**: Carbono acumulado até a penúltima camada ($t/ha$);
+* **$mtn$**: Massa de solo seco da última camada ($t/ha$);
+* **$mti$**: Massa de solo acumulada total do ponto ($t/ha$);
+* **$msi$**: Massa de solo acumulada da referência (MATA) ($t/ha$);
 * **$ctn$**: Concentração de carbono na última camada ($t/t$).
 
 ## Arquitetura da Automação
@@ -37,19 +37,19 @@ Análise Cruzada: Realiza um merge tipo cross entre cada ponto de tratamento e t
 3. Consolidação e Estatística
 O script gera quatro níveis de visualização:
 
-Por Ponto (Tratamentos): Média e desvio padrão de cada ponto de coleta.
+Por Ponto (Tratamentos): média e desvio padrão de cada ponto de coleta.
 
-Por Ponto (Mata): Validação interna da variabilidade da área de referência.
+Por Ponto (Mata): validação interna da variabilidade da área de referência.
 
-Por Talhão: Média consolidada de todas as amostras pertencentes a uma unidade de manejo.
+Por Talhão: média consolidada de todas as amostras pertencentes a uma unidade de manejo.
 
-Resumo Geral: Comparativo simplificado entre a média total dos talhões e a média da mata.
+Resumo Geral: comparativo simplificado entre a média total dos talhões e a média da mata.
 
 ## Estrutura de saída
 
-O arquivo de saída é nomeado dinamicamente (ex: 2025200_Relatorio_Estoque_Carbono.xlsx) e contém as seguintes abas:
+O arquivo de saída é nomeado dinamicamente (ex: S2025200_Estoque_Carbono.xlsx) e contém as seguintes abas:
 
-| Aba | Nome                     | Conteúdo                                   |
+| Aba | Título                     | Conteúdo                                   |
 | :-- | :---------------------- | :----------------------------------------- |
 | 1   | **Estoque_Ponto_Trat**  | Média e Desvio Padrão por Ponto           |
 | 2   | **Estoque_Ponto_Mata**  | Média e Desvio Padrão da Referência (Mata)|

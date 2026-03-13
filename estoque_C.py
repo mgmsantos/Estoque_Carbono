@@ -294,7 +294,7 @@ display(resumo)
 # ========== EXPORTAÇÃO PARA EXCEL EM MÚLTIPLAS ABAS ==========
 
 # Nome do arquivo de saída
-arquivo_saida = f"{ANO}{OS}_Relatorio_Estoque_Carbono.xlsx"
+arquivo_saida = f"S{ANO}{OS}_Estoque_Carbono.xlsx"
 
 with pd.ExcelWriter(arquivo_saida) as writer:
     # 1ª Aba: Estoque por ponto de coleta (apenas tratamentos)
