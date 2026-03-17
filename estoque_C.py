@@ -7,14 +7,10 @@ import numpy as np
 from IPython.display import display
 import openpyxl
 
-# %%
-
 # ======== DEFINIÇÃO DO CAMINHO ==========
-CAMINHO = Path(r"\\Agroserver\libs_analise\Backup 2025\01_Comerciais\2025\21. OS_200\06_Estoque de Carbono\teste")
-ANO = 2025
-OS = 200
-
-# %%
+CAMINHO = Path(r"C:\Users\MiguelSantos\OneDrive - Agrorobotica Fotonica Em Certificacoes Agroambientais\AGROROBOTICA\PROJETOS\Estoque_Carbono\teste")
+ANO = 2026
+OS = 169
 
 # ========== FUNÇÕES DE EXECUÇÃO ==========
 
@@ -135,6 +131,9 @@ def associar_carbono_densidade(lista_dfs: list):
 # Calcular o estoque de carbono no solo
 def estoque_carbono(df: pd.DataFrame):
 
+    if 'MATA' not in df['Talhão'].values:
+        raise ValueError("Dados de 'MATA' não encontrados. O procedimento foi interrompido.")
+
     df['Dry_Mass_(t/ha)'] = df['Espessura_(m)'] * df['Densidade_(g/cm3)'] * 10000
     df['C_Estoque_(t/ha)'] = df['Espessura_(m)'] * df['C_Quantitativo_(g/kg)'] * df['Densidade_(g/cm3)'] * 10
 
@@ -231,13 +230,9 @@ def main(caminho_origem: Path):
 
     return df_calculado
 
-# %%
-
 # ========== EXECUÇÃO ==========
 dados_finais = main(CAMINHO)
 dados_finais
-
-# %%
 
 # ==== ESTOQUE DE CARBONO DOS TRATAMENTOS POR PONTO ====
 estoque_ponto = (
@@ -288,9 +283,6 @@ resumo = (
 print(f"Estoque de carbono médio e desvio padrão dos talhões e mata:")
 display(resumo)
 
-# %%
-
-# %%
 # ========== EXPORTAÇÃO PARA EXCEL EM MÚLTIPLAS ABAS ==========
 
 # Nome do arquivo de saída
